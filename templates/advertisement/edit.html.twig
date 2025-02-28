@@ -1,0 +1,238 @@
+{# templates/advertisement/edit.html.twig #}
+{% extends 'base.html.twig' %}
+
+{% block title %}Edit Advertisement{% endblock %}
+
+{% block body %}
+    <div class="container mt-4">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-white py-3">
+                        <h2 class="mb-0">Edit Advertisement</h2>
+                    </div>
+                    <div class="card-body">
+                        {# Display current images #}
+                        {% if advertisement.advertisementImages|length > 0 %}
+                            <div class="mb-4">
+                                <h5>Current Images</h5>
+                                <div class="row g-2">
+                                    {% for image in advertisement.advertisementImages %}
+                                        <div class="col-md-3">
+                                            <div class="position-relative">
+                                                <img src="{{ asset('uploads/advertisements/' ~ image.filename) }}"
+                                                     class="img-thumbnail"
+                                                     alt="Advertisement image">
+                                                <div class="position-absolute top-0 end-0 mt-1 me-1">
+                                                    <button type="button" class="btn btn-sm btn-danger"
+                                                            data-bs-toggle="modal"
+                                                            data-bs-target="#deleteImageModal"
+                                                            data-csrf="{{ csrf_token('delete' ~ image.id) }}"
+                                                            data-id="{{ image.id }}">
+                                                        <i class="bi bi-trash"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        {% endif %}
+
+                        {{ form_start(form) }}
+                        <div class="row g-3">
+                            {# Title #}
+                            <div class="col-12">
+                                {{ form_label(form.title, null, {'label_attr': {'class': 'form-label'}}) }}
+                                {{ form_widget(form.title, {'attr': {'class': 'form-control'}}) }}
+                                {{ form_errors(form.title) }}
+                            </div>
+
+                            {# Description #}
+                            <div class="col-12">
+                                {{ form_label(form.description, null, {'label_attr': {'class': 'form-label'}}) }}
+                                {{ form_widget(form.description, {
+                                    'attr': {
+                                        'class': 'form-control',
+                                        'rows': 5,
+                                        'style': 'resize: none;'
+                                    }
+                                }) }}
+                                {{ form_errors(form.description) }}
+                            </div>
+
+                            {# Price #}
+                            <div class="col-md-6">
+                                {{ form_label(form.price, null, {'label_attr': {'class': 'form-label'}}) }}
+                                <div class="input-group">
+                                    <span class="input-group-text">£</span>
+                                    {{ form_widget(form.price, {
+                                        'attr': {'class': 'form-control'},
+                                        'currency': false
+                                    }) }}
+                                </div>
+                                {{ form_errors(form.price) }}
+                            </div>
+
+                            {# Location - County #}
+                            <div class="col-md-6">
+                                {{ form_label(form.state, 'County', {'label_attr': {'class': 'form-label'}}) }}
+                                {{ form_widget(form.state, {
+                                    'attr': {
+                                        'class': 'form-select county-select',
+                                        'data-location-target': 'county'
+                                    }
+                                }) }}
+                                {{ form_errors(form.state) }}
+                            </div>
+
+                            {# Location - City #}
+                            <div class="col-md-6">
+                                {{ form_label(form.city, null, {'label_attr': {'class': 'form-label'}}) }}
+                                {{ form_widget(form.city, {
+                                    'attr': {
+                                        'class': 'form-select city-select',
+                                        'data-location-target': 'city'
+                                    }
+                                }) }}
+                                {{ form_errors(form.city) }}
+                            </div>
+
+                            {# Categories #}
+                            <div class="col-12">
+                                <label class="form-label">{{ form_label(form.categories) }}</label>
+                                <div class="row g-3">
+                                    {% for category in form.categories %}
+                                        <div class="col-md-4">
+                                            <div class="form-check">
+                                                {{ form_widget(category, {'attr': {'class': 'form-check-input'}}) }}
+                                                {{ form_label(category, null, {'label_attr': {'class': 'form-check-label'}}) }}
+                                            </div>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                                {{ form_errors(form.categories) }}
+                            </div>
+
+                            {# Add More Images #}
+                            <div class="col-12">
+                                {{ form_label(form.images, 'Add More Images', {'label_attr': {'class': 'form-label'}}) }}
+                                {{ form_widget(form.images, {'attr': {'class': 'form-control'}}) }}
+                                <div class="form-text">
+                                    Select one or more images to add to your advertisement (JPG, PNG only, max 5MB each).
+                                </div>
+                                {{ form_errors(form.images) }}
+                            </div>
+
+                            {# Submit Button #}
+                            <div class="col-12">
+                                <hr>
+                                <div class="d-flex justify-content-end gap-2">
+                                    <a href="{{ path('app_advertisement_show', {'id': advertisement.id}) }}" class="btn btn-outline-secondary">Cancel</a>
+                                    <button type="submit" class="btn btn-primary px-4">
+                                        Update Advertisement
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        {{ form_end(form) }}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal fade" id="deleteImageModal" tabindex="-1">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Delete Image</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        Are you sure you want to delete this image?
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <form id="deleteImageForm" method="POST">
+                            <input type="hidden" name="_token" id="deleteImageToken">
+                            <button type="submit" class="btn btn-danger">Delete</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        .form-check-input:checked {
+            background-color: #0d6efd;
+            border-color: #0d6efd;
+        }
+
+        .card {
+            border: none;
+            box-shadow: 0 0 20px rgba(0, 0, 0, .08);
+        }
+
+        .card-header {
+            border-bottom: 1px solid #eee;
+        }
+    </style>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Location dropdown logic
+            const countySelect = document.querySelector('.county-select');
+            const citySelect = document.querySelector('.city-select');
+            const currentCity = '{{ advertisement.city }}';
+            const locations = {{ locations|json_encode|raw }};
+
+            function updateCities(selectedCounty, selectedCity = null) {
+                citySelect.innerHTML = '<option value="">Select a city</option>';
+
+                if (selectedCounty) {
+                    const cities = locations[selectedCounty] || [];
+                    cities.forEach(city => {
+                        const option = new Option(city, city);
+                        option.selected = city === selectedCity;
+                        citySelect.add(option);
+                    });
+                    citySelect.disabled = false;
+                } else {
+                    citySelect.disabled = true;
+                }
+            }
+
+            // Initial population of cities based on selected county
+            if (countySelect.value) {
+                updateCities(countySelect.value, currentCity);
+            }
+
+            // Handle county change
+            countySelect.addEventListener('change', function() {
+                updateCities(this.value);
+            });
+
+            // Delete Image Modal logic
+            const deleteImageModal = document.getElementById('deleteImageModal');
+            if (deleteImageModal) {
+                deleteImageModal.addEventListener('show.bs.modal', (event) => {
+                    const button = event.relatedTarget;
+                    const imageId = button.getAttribute('data-id');
+                    const csrfToken = button.getAttribute('data-csrf');
+
+                    // Update the form action and CSRF token
+                    const form = document.getElementById('deleteImageForm');
+                    form.action = "{{ path('app_advertisement_delete_image', {'id': 'IMAGE_ID'}) }}".replace('IMAGE_ID', imageId);
+                    document.getElementById('deleteImageToken').value = csrfToken;
+                });
+            }
+        });
+    </script>
+{% endblock %}

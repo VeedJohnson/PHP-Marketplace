@@ -1,0 +1,21 @@
+{% if totalPages > 1 %}
+    <nav class="mt-4">
+        <ul class="pagination justify-content-center">
+            <li class="page-item {{ currentPage == 1 ? 'disabled' : '' }}">
+                <a class="page-link" href="{{ path(route, query|merge({page: currentPage - 1})) }}">
+                    &laquo; Previous
+                </a>
+            </li>
+            {% for i in 1..totalPages %}
+                <li class="page-item {{ currentPage == i ? 'active' : '' }}">
+                    <a class="page-link" href="{{ path(route, query|merge({page: i})) }}">{{ i }}</a>
+                </li>
+            {% endfor %}
+            <li class="page-item {{ currentPage == totalPages ? 'disabled' : '' }}">
+                <a class="page-link" href="{{ path(route, query|merge({page: currentPage + 1})) }}">
+                    Next &raquo;
+                </a>
+            </li>
+        </ul>
+    </nav>
+{% endif %}

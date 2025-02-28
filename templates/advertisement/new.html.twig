@@ -1,0 +1,164 @@
+{# templates/advertisement/new.html.twig #}
+{% extends 'base.html.twig' %}
+
+{% block title %}New Advertisement{% endblock %}
+
+{% block body %}
+    <div class="container mt-4">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-white py-3">
+                        <h2 class="mb-0">Create New Advertisement</h2>
+                    </div>
+                    <div class="card-body">
+                        {{ form_start(form) }}
+                        <div class="row g-3">
+                            {# Title #}
+                            <div class="col-12">
+                                {{ form_label(form.title, null, {'label_attr': {'class': 'form-label'}}) }}
+                                {{ form_widget(form.title, {'attr': {'class': 'form-control'}}) }}
+                                {{ form_errors(form.title) }}
+                            </div>
+
+                            {# Description #}
+                            <div class="col-12">
+                                {{ form_label(form.description, null, {'label_attr': {'class': 'form-label'}}) }}
+                                {{ form_widget(form.description, {
+                                    'attr': {
+                                        'class': 'form-control',
+                                        'rows': 5,
+                                        'style': 'resize: none;'
+                                    }
+                                }) }}
+                                {{ form_errors(form.description) }}
+                            </div>
+
+                            {# Price #}
+                            <div class="col-md-6">
+                                {{ form_label(form.price, null, {'label_attr': {'class': 'form-label'}}) }}
+                                <div class="input-group">
+                                    <span class="input-group-text">£</span>
+                                    {{ form_widget(form.price, {
+                                        'attr': {'class': 'form-control'},
+                                        'currency': false
+                                    }) }}
+                                </div>
+                                {{ form_errors(form.price) }}
+                            </div>
+
+                            {# Location #}
+                            <div class="col-md-6">
+                                {{ form_label(form.state, 'County', {'label_attr': {'class': 'form-label'}}) }}
+                                {{ form_widget(form.state, {
+                                    'attr': {
+                                        'class': 'form-select county-select',
+                                        'data-location-target': 'county'
+                                    }
+                                }) }}
+                                {{ form_errors(form.state) }}
+                            </div>
+
+                            <div class="col-md-6">
+                                {{ form_label(form.city, null, {'label_attr': {'class': 'form-label'}}) }}
+                                {{ form_widget(form.city, {
+                                    'attr': {
+                                        'class': 'form-select city-select',
+                                        'data-location-target': 'city'
+                                    }
+                                }) }}
+                                {{ form_errors(form.city) }}
+                            </div>
+
+                            {# Categories #}
+                            <div class="col-12">
+                                <label class="form-label">{{ form_label(form.categories) }}</label>
+                                <div class="row g-3">
+                                    {% for category in form.categories %}
+                                        <div class="col-md-4">
+                                            <div class="form-check">
+                                                {{ form_widget(category, {'attr': {'class': 'form-check-input'}}) }}
+                                                {{ form_label(category, null, {'label_attr': {'class': 'form-check-label'}}) }}
+                                            </div>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                                {{ form_errors(form.categories) }}
+                            </div>
+
+                            {# Images #}
+                            <div class="col-12">
+                                {{ form_label(form.images, null, {'label_attr': {'class': 'form-label'}}) }}
+                                {{ form_widget(form.images, {'attr': {'class': 'form-control'}}) }}
+                                <div class="form-text">
+                                    Upload up to 5 images (JPG, PNG only, max 5MB each)
+                                </div>
+                                {{ form_errors(form.images) }}
+                            </div>
+
+                            {# Submit Button #}
+                            <div class="col-12">
+                                <hr>
+                                <div class="d-flex justify-content-end gap-2">
+                                    <a href="{{ path('app_home') }}" class="btn btn-outline-secondary">Cancel</a>
+                                    <button type="submit" class="btn btn-primary px-4">
+                                        Create Advertisement
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        {{ form_end(form) }}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        .form-check-input:checked {
+            background-color: #0d6efd;
+            border-color: #0d6efd;
+        }
+
+        .card {
+            border: none;
+            box-shadow: 0 0 20px rgba(0,0,0,.08);
+        }
+
+        .card-header {
+            border-bottom: 1px solid #eee;
+        }
+    </style>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const countySelect = document.querySelector('.county-select');
+            const citySelect = document.querySelector('.city-select');
+
+            // Define UK locations
+            const locations = {{ locations|json_encode|raw }};
+
+            countySelect.addEventListener('change', function() {
+                const selectedCounty = this.value;
+                citySelect.innerHTML = '<option value="">Select a city</option>';
+
+                if (selectedCounty) {
+                    const cities = locations[selectedCounty] || [];
+                    cities.forEach(city => {
+                        const option = new Option(city, city);
+                        citySelect.add(option);
+                    });
+                    citySelect.disabled = false;
+                } else {
+                    citySelect.disabled = true;
+                }
+            });
+        });
+    </script>
+{% endblock %}

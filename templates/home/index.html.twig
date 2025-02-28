@@ -1,0 +1,304 @@
+{# templates/home/index.html.twig #}
+{% extends 'base.html.twig' %}
+{% block body %}
+    <div class="container py-4">
+        <div class="search-container d-none d-md-block">
+            {% for message in app.flashes('error') %}
+                <div class="alert alert-danger">
+                    {{ message }}
+                </div>
+            {% endfor %}
+            <form action="{{ path('app_home') }}" method="GET" class="mb-4" id="searchForm">
+                <div class="row g-3">
+                    {# Search input #}
+                    <div class="col-md-4">
+                        <input type="text"
+                               name="q"
+                               class="form-control"
+                               placeholder="Search items..."
+                               value="{{ searchQuery }}">
+                    </div>
+
+                    {# Location dropdowns #}
+                    <div class="col-md-2">
+                        <select class="form-select" id="countySelect" name="county">
+                            <option value="">All Counties</option>
+                            {% for county in counties|keys %}
+                                <option value="{{ county }}" {% if selectedCounty == county %}selected{% endif %}>
+                                    {{ county }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <select class="form-select" id="citySelect" name="city" {% if not selectedCounty %}disabled{% endif %}>
+                            <option value="">{% if selectedCounty %}All cities in {{ selectedCounty }}{% else %}Select County First{% endif %}</option>
+                            {% if selectedCounty and counties[selectedCounty] is defined %}
+                                {% for city in counties[selectedCounty] %}
+                                    <option value="{{ city }}" {% if selectedCity == city %}selected{% endif %}>
+                                        {{ city }}
+                                    </option>
+                                {% endfor %}
+                            {% endif %}
+                        </select>
+                    </div>
+
+                    {# Price range #}
+                    <div class="col-md-1">
+                        <input type="number"
+                               name="min_price"
+                               class="form-control"
+                               placeholder="Min £"
+                               {% if minPrice is not empty %}value="{{ minPrice }}"{% endif %}>
+                    </div>
+                    <div class="col-md-1">
+                        <input type="number"
+                               name="max_price"
+                               class="form-control"
+                               placeholder="Max £"
+                               {% if maxPrice is not empty %}value="{{ maxPrice }}"{% endif %}>
+                    </div>
+
+                    <div class="col-auto">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-search"></i> Search
+                        </button>
+                    </div>
+
+                    {% if selectedCategory %}
+                        <input type="hidden" name="category" value="{{ selectedCategory.id }}">
+                    {% endif %}
+                </div>
+            </form>
+
+            {# Active filters #}
+            {% if searchQuery or minPrice or maxPrice or selectedCounty or selectedCity %}
+                <div class="filter-tags">
+                    {% if searchQuery %}
+                        <a href="{{ path('app_home', app.request.query.all|merge({'q': null})) }}" class="filter-tag">
+                            "{{ searchQuery }}" <i class="bi bi-x"></i>
+                        </a>
+                    {% endif %}
+                    {% if selectedCounty or selectedCity %}
+                        <a href="{{ path('app_home', app.request.query.all|merge({'county': null, 'city': null})) }}" class="filter-tag">
+                            Location: {% if selectedCity %}{{ selectedCity }}, {% endif %}{{ selectedCounty }} <i class="bi bi-x"></i>
+                        </a>
+                    {% endif %}
+                    {% if minPrice or maxPrice %}
+                        <a href="{{ path('app_home', app.request.query.all|merge({'min_price': null, 'max_price': null})) }}" class="filter-tag">
+                            Price: £{{ minPrice|default(0) }}-{{ maxPrice|default('any') }} <i class="bi bi-x"></i>
+                        </a>
+                    {% endif %}
+                </div>
+            {% endif %}
+        </div>
+
+
+        <div class="row">
+            <div class="col-md-3 mb-4">
+                <button class="filters-toggle-btn d-md-none w-100 mb-3" type="button" data-bs-toggle="collapse" data-bs-target="#filtersCollapse" aria-expanded="false" aria-controls="filtersCollapse">
+                    <i class="bi bi-filter"></i> Filters & Categories
+                </button>
+
+                <div class="collapse d-md-block" id="filtersCollapse">
+                    <!-- Filters -->
+                    <div class="card mb-3 d-md-none">
+                        <div class="card-body">
+                            <form action="{{ path('app_home') }}" method="GET" class="mb-4" id="searchForm">
+                                <div class="mb-3">
+                                    <input type="text" name="q" class="form-control" placeholder="Search items..." value="{{ searchQuery }}">
+                                </div>
+                                <div class="mb-3">
+                                    <select class="form-select" id="countySelect" name="county">
+                                        <option value="">All Counties</option>
+                                        {% for county in counties|keys %}
+                                            <option value="{{ county }}" {% if selectedCounty == county %}selected{% endif %}>
+                                                {{ county }}
+                                            </option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <select class="form-select" id="citySelect" name="city" {% if not selectedCounty %}disabled{% endif %}>
+                                        <option value="">{% if selectedCounty %}All cities in {{ selectedCounty }}{% else %}Select County First{% endif %}</option>
+                                        {% if selectedCounty and counties[selectedCounty] is defined %}
+                                            {% for city in counties[selectedCounty] %}
+                                                <option value="{{ city }}" {% if selectedCity == city %}selected{% endif %}>
+                                                    {{ city }}
+                                                </option>
+                                            {% endfor %}
+                                        {% endif %}
+                                    </select>
+                                </div>
+                                <div class="row g-2">
+                                    <div class="col">
+                                        <input type="number" name="min_price" class="form-control" placeholder="Min £" {% if minPrice is not empty %}value="{{ minPrice }}"{% endif %}>
+                                    </div>
+                                    <div class="col">
+                                        <input type="number" name="max_price" class="form-control" placeholder="Max £" {% if maxPrice is not empty %}value="{{ maxPrice }}"{% endif %}>
+                                    </div>
+                                </div>
+                                <div class="d-grid mt-3">
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="bi bi-search"></i> Search
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- Categories -->
+                    <div class="list-group">
+                        <a href="{{ path('app_home') }}" class="list-group-item d-flex justify-content-between align-items-center {% if selectedCategory is null %}active{% endif %}">
+                            All Categories
+                            <span class="badge bg-secondary rounded-pill">{{ totalActiveAds }}</span>
+                        </a>
+                        {% for category in categories %}
+                            <a href="{{ path('app_home', {'category': category.id}) }}" class="list-group-item d-flex justify-content-between align-items-center {% if selectedCategory and selectedCategory.id == category.id %}active{% endif %}">
+                                {{ category.name }}
+                                <span class="badge bg-secondary rounded-pill">
+                                {{ category.advertisements|filter(a => a.status == 'active')|length }}
+                            </span>
+                            </a>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+
+            {# Main Content #}
+            <div class="col-md-9">
+                {% if advertisements|length > 0 %}
+                    <div class="row g-4">
+                        {% for ad in advertisements %}
+                            <div class="col-md-4">
+                                <div class="card h-100">
+                                    <a href="{{ path('app_advertisement_show', {'id': ad.id}) }}" class="text-decoration-none">
+                                        {% if ad.advertisementImages|length > 0 %}
+                                            <img src="{{ asset('uploads/advertisements/' ~ ad.advertisementImages.first.filename) }}"
+                                                 class="card-img-top" alt="{{ ad.title }}"
+                                                 style="height: 200px; object-fit: cover;">
+                                        {% else %}
+                                            <img src="{{ asset('images/no-img.png') }}"
+                                                 class="card-img-top" alt="No image"
+                                                 style="height: 200px; object-fit: cover;">
+                                        {% endif %}
+
+                                        <div class="card-body">
+                                            <h5 class="card-title text-dark">{{ ad.title }}</h5>
+                                            <p class="card-text fw-bold text-primary">£{{ ad.price }}</p>
+                                            <p class="card-text text-muted">
+                                                <small>
+                                                    <i class="bi bi-geo-alt"></i> {{ ad.city }}, {{ ad.state }}
+                                                </small>
+                                            </p>
+                                        </div>
+                                    </a>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+
+                    {# Pagination #}
+                    {% include 'partials/_pagination.html.twig' with {
+                        route: 'app_home',
+                        query: app.request.query.all,
+                        currentPage: currentPage,
+                        totalPages: totalPages
+                    } %}
+                {% else %}
+                    <div class="alert alert-info text-center py-5">
+                        <h5>No advertisements found</h5>
+                        <p>Try adjusting your filters or searching with different keywords.</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+
+    </div>
+{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        .filters-toggle-btn {
+            background-color: #007bff; /* Primary blue color */
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px; /* Space between icon and text */
+            transition: background-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .filters-toggle-btn:hover {
+            background-color: #0056b3; /* Darker blue on hover */
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .filters-toggle-btn:focus {
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.5); /* Focus ring */
+        }
+    </style>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const countySelect = document.getElementById('countySelect');
+            const citySelect = document.getElementById('citySelect');
+            const locations = {{ counties|json_encode|raw }};
+
+            countySelect.addEventListener('change', function() {
+                const selectedCounty = this.value;
+                citySelect.innerHTML = `<option value="">All cities in ${selectedCounty || 'county'}</option>`;
+
+                if (selectedCounty && locations[selectedCounty]) {
+                    locations[selectedCounty].forEach(city => {
+                        const option = new Option(city, city);
+                        citySelect.add(option);
+                    });
+                    citySelect.disabled = false;
+                } else {
+                    citySelect.disabled = true;
+                }
+            });
+        });
+
+        document.getElementById('searchForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const minPrice = parseFloat(this.querySelector('[name="min_price"]').value) || 0;
+            const maxPrice = parseFloat(this.querySelector('[name="max_price"]').value) || Infinity;
+
+            if (minPrice > maxPrice) {
+                alert('Minimum price cannot be greater than maximum price');
+                return;
+            }
+
+            // Get form data
+            const formData = new FormData(this);
+            const params = new URLSearchParams();
+
+            // Only add non-empty values
+            for (const [key, value] of formData.entries()) {
+                if (typeof  value === 'string') {
+                    if (value.trim() !== '') {
+                        params.append(key, value);
+                    }
+                }
+            }
+
+            // Redirect to the filtered URL
+            window.location.href = '{{ path('app_home') }}' +
+                (params.toString() ? '?' + params.toString() : '');
+        });
+    </script>
+{% endblock %}
