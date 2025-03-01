@@ -1,0 +1,106 @@
+{# templates/admin/users.html.twig #}
+{% extends 'base.html.twig' %}
+
+{% block title %}User Management - Admin{% endblock %}
+
+{% block body %}
+    <div class="container py-4">
+        <h1 class="mb-4">Admin Dashboard</h1>
+
+        <div class="row">
+            <!-- User Stats -->
+            <div class="col-md-4">
+                <a href="{{ path('app_admin_users') }}" class="text-decoration-none">
+                    <div class="card bg-primary text-white mb-3">
+                        <div class="card-body">
+                            <h5 class="card-title">Total Users</h5>
+                            <p class="card-text display-4">{{ totalUsers }}</p>
+                        </div>
+                    </div>
+                </a>
+            </div>
+            <div class="col-md-4">
+                <a href="{{ path('app_admin_users') }}" class="text-decoration-none">
+                    <div class="card bg-success text-white mb-3">
+                        <div class="card-body">
+                            <h5 class="card-title">Total Moderators</h5>
+                            <p class="card-text display-4">{{ totalModerators }}</p>
+                        </div>
+                    </div>
+                </a>
+            </div>
+            <div class="col-md-4">
+                <a href="{{ path('app_admin_users') }}" class="text-decoration-none">
+                    <div class="card bg-warning text-dark mb-3">
+                        <div class="card-body">
+                            <h5 class="card-title">Total Admins</h5>
+                            <p class="card-text display-4">{{ totalAdmins }}</p>
+                        </div>
+                    </div>
+                </a>
+            </div>
+        </div>
+
+        <div class="row">
+            <!-- Advertisement Stats -->
+            <div class="col-md-4">
+                <a href="{{ path('app_category_index') }}" class="text-decoration-none">
+                    <div class="card bg-danger text-white mb-3">
+                        <div class="card-body">
+                            <h5 class="card-title">Total Categories</h5>
+                            <p class="card-text display-4">{{ totalCategories }}</p>
+                        </div>
+                    </div>
+                </a>
+            </div>
+            <div class="col-md-4">
+                <div class="card bg-info text-white mb-3">
+                    <div class="card-body">
+                        <h5 class="card-title">Total Advertisements</h5>
+                        <p class="card-text display-4">{{ totalAds }}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card bg-secondary text-white mb-3">
+                    <div class="card-body">
+                        <h5 class="card-title">Active Advertisements</h5>
+                        <p class="card-text display-4">{{ activeAds }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <!-- Category Breakdown -->
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Advertisements by Category</h5>
+                        <table class="table table-striped">
+                            <thead>
+                            <tr>
+                                <th>Category</th>
+                                <th>Total Ads</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {% for category in categoriesWithAds %}
+                                <tr>
+                                    <td>{{ category.name }}</td>
+                                    <td>{{ category.adCount }}</td>
+                                </tr>
+                            {% else %}
+                                <tr>
+                                    <td colspan="2" class="text-center">No categories found</td>
+                                </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}

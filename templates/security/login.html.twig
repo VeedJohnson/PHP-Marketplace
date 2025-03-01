@@ -1,0 +1,83 @@
+{# templates/security/login.html.twig #}
+{% extends 'base.html.twig' %}
+
+{% block title %}Login - Ads Center{% endblock %}
+
+{% block body %}
+    <div class="container mt-5">
+        <div class="row justify-content-center">
+            <div class="col-md-6 col-lg-5">
+                <div class="card shadow-sm">
+                    <div class="card-body p-4">
+                        <h2 class="text-center mb-4">Login</h2>
+
+                        {% for message in app.flashes('success') %}
+                            <div class="alert alert-success">
+                                {{ message }}
+                            </div>
+                        {% endfor %}
+
+                        {% for message in app.flashes('error') %}
+                            <div class="alert alert-danger">
+                                {{ message }}
+                            </div>
+                        {% endfor %}
+
+                        {% if error and error.messageKey == 'Please verify your email before logging in.' %}
+                            <div class="alert alert-warning">
+                                {{ error.messageKey }}
+                                <form action="{{ path('app_resend_verification') }}" method="post">
+                                    <input type="hidden" name="email" value="{{ last_username }}">
+                                    <button type="submit" class="btn btn-link p-0">Resend verification email</button>
+                                </form>
+                            </div>
+                        {% elseif error %}
+                            <div class="alert alert-danger">
+                                {{ error.messageKey|trans(error.messageData, 'security') }}
+                            </div>
+                        {% endif %}
+
+                        {% if app.user %}
+                            <div class="alert alert-info mb-3">
+                                Logged in as {{ app.user.userIdentifier }}
+                                <a href="{{ path('app_logout') }}" class="alert-link">Logout</a>
+                            </div>
+                        {% else %}
+                        <form method="post">
+                            <div class="mb-3">
+                                <label for="inputEmail" class="form-label">Email</label>
+                                <input type="email" value="{{ last_username }}" name="email" id="inputEmail"
+                                       class="form-control" autocomplete="email" required autofocus>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="inputPassword" class="form-label">Password</label>
+                                <input type="password" name="password" id="inputPassword"
+                                       class="form-control" autocomplete="current-password" required>
+                            </div>
+
+                            <div class="mb-3">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div class="form-check">
+                                        <input type="checkbox" class="form-check-input" id="remember_me" name="_remember_me">
+                                        <label class="form-check-label" for="remember_me">Remember me</label>
+                                    </div>
+                                    <a href="{{ path('app_forgot_password_request') }}" class="text-decoration-none">Forgot password?</a>
+                                </div>
+                            </div>
+
+                            <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
+
+                            <button class="btn btn-primary w-100" type="submit">Sign in</button>
+
+                            <div class="text-center mt-3">
+                                <small>Don't have an account? <a href="{{ path('app_register') }}">Register here</a></small>
+                            </div>
+                        </form>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

@@ -1,0 +1,112 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+    <div class="container py-4">
+        <a href="{{ path('app_admin_dashboard') }}" class="btn btn-secondary btn-sm mb-3">
+            <i class="bi bi-arrow-left"></i> Back to Dashboard
+        </a>
+        <h1>Manage Categories</h1>
+
+        <a href="{{ path('app_category_new') }}" class="btn btn-primary mb-3">Add New Category</a>
+
+        <div class="card">
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-bordered">
+                        <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Name</th>
+                            <th>Description</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for category in categories %}
+                            <tr>
+                                <td>{{ category.id }}</td>
+                                <td>{{ category.name }}</td>
+                                <td>{{ category.description }}</td>
+                                <td>
+                        <span class="badge {{ category.isActive ? 'bg-success' : 'bg-danger' }}">
+                            {{ category.isActive ? 'Active' : 'Inactive' }}
+                        </span>
+                                </td>
+                                <td>
+                                    <a href="{{ path('app_category_edit', {id: category.id}) }}" class="btn btn-warning btn-sm">Edit</a>
+                                    <button type="button" class="btn btn-sm btn-danger"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#deleteCategoryModal"
+                                            data-csrf="{{ csrf_token('delete' ~ category.id) }}"
+                                            data-id="{{ category.id }}"
+                                            data-name="{{ category.name }}">
+                                        Delete
+                                    </button>
+                                    <form method="post" action="{{ path('app_category_toggle', {id: category.id}) }}" style="display: inline-block;">
+                                        <button class="btn btn-secondary btn-sm">
+                                            {{ category.isActive ? 'Deactivate' : 'Activate' }}
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                        {% else %}
+                            <tr>
+                                <td colspan="5" class="text-center">No categories found</td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        {# Delete Category Modal #}
+        <div class="modal fade" id="deleteCategoryModal" tabindex="-1">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Delete Category</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        Are you sure you want to delete the category "<span id="deleteCategoryName"></span>" (ID: <span id="deleteCategoryId"></span>)?
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <form id="deleteCategoryForm" method="POST">
+                            <input type="hidden" name="_token" id="deleteCategoryToken">
+                            <button type="submit" class="btn btn-danger">Delete</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Delete Modal
+            const deleteCategoryModal = document.getElementById('deleteCategoryModal');
+            deleteCategoryModal.addEventListener('show.bs.modal', (event) => {
+                const button = event.relatedTarget;
+                const categoryId = button.getAttribute('data-id');
+                const categoryName = button.getAttribute('data-name');
+                const csrfToken = button.getAttribute('data-csrf');
+
+                // Populate modal content
+                document.getElementById('deleteCategoryId').textContent = categoryId;
+                document.getElementById('deleteCategoryName').textContent = categoryName;
+
+                // Update the form action and CSRF token
+
+                // Update the form action and CSRF token
+                const form = document.getElementById('deleteCategoryForm');
+                form.action = "{{ path('app_category_delete', {'id': 'CATEGORY_ID'}) }}".replace('CATEGORY_ID', categoryId);
+                document.getElementById('deleteCategoryToken').value = csrfToken;
+            });
+        });
+    </script>
+{% endblock %}

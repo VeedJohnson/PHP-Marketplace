@@ -1,0 +1,40 @@
+{# templates/rest/reset.html.twig #}
+{% extends 'base.html.twig' %}
+
+{% block title %}Reset Password{% endblock %}
+
+{% block body %}
+    <div class="container mt-5">
+        <div class="row justify-content-center">
+            <div class="col-md-6 col-lg-5">
+                <div class="card shadow-sm">
+                    <div class="card-body p-4">
+                        <h2 class="text-center mb-4">Reset Password</h2>
+
+                        {{ form_start(resetForm) }}
+                        <div class="mb-3">
+                            {{ form_label(resetForm.plainPassword.first, null, {'label_attr': {'class': 'form-label'}}) }}
+                            {{ form_widget(resetForm.plainPassword.first, {'attr': {'class': 'form-control'}}) }}
+                            <div class="form-error">
+                                {{ form_errors(resetForm.plainPassword.first) }}
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            {{ form_label(resetForm.plainPassword.second, null, {'label_attr': {'class': 'form-label'}}) }}
+                            {{ form_widget(resetForm.plainPassword.second, {'attr': {'class': 'form-control'}}) }}
+                            <div class="form-error">
+                                {{ form_errors(resetForm.plainPassword.second) }}
+                            </div>
+                        </div>
+
+                        <div class="d-grid">
+                            <button class="btn btn-primary btn-lg">Reset password</button>
+                        </div>
+                        {{ form_end(resetForm) }}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
